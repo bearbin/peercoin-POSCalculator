@@ -8,60 +8,59 @@
 	<meta charset="UTF-8">
 
 	<title>Peercoin - POS calculator</title>
-	
-	<script type="text/javascript">
+
+	<script>
+		function run() {
+			// Fetch the transaction information.
+			var total_coins = document.getElementById('transaction_value').value;
+			var transaction_age = document.getElementById('transaction_age').value;
+			var simulation_time = document.getElementById('simulation_time').value;
+
+			// Initialise the table with the basic information.
+			var new_table = "<table>";
+			new_table += "  <tr>";
+			new_table += "    <th>Month</th>";
+			new_table += "    <th>Estimated Reward</th>";
+			new_table += "    <th>Estimated Total</th>";
+			new_table += "  </tr>";
+
+			// Loop through and simulate the probability.
+			for (var i = 1; i <= simulation_time; i++) {
+				new_table += "  <tr>";
+				new_table += "    <td>" + i + "</td>";
+				new_table += "    <td>" + i + "</td>";
+				new_table += "    <td>" + i + "</td>";
+				new_table += "  </tr>";
+			};
+
+			new_table += "</table>";
+			// Write the results to the results div.
+			document.getElementById('results').innerHTML = new_table;
+		};
+
+		function calculate_reward(days, coins) {
+			return (days<31?0:((days*coins)*33/((365*33+8))*0.01));
+		};
+
+		function calculate_coinage(days, coins) {
+			// Coinage does not accumulate until day 31.
+			if (30 >= days) {
+				return 0;
+			};
+			// Coinage reaches a maximum at day 90.
+			if (90 <= days) {
+				return 60 * coins;
+			};
+			// Otherwise, coinage is days - 30 * coins
+			return (days - 30) * coins;
+		};
+
 		function is_int(value){ 
-			if((parseFloat(value) == parseInt(value)) && !isNaN(value)){
+			if ((parseFloat(value) == parseInt(value)) && !isNaN(value)){
 				return true;
 			} else { 
 				return false;
 			} 
-		}
-	</script>
-
-	<script type="text/javascript">
-		function run() {
-		//   alert("calculating the Proof Of Stake reward");
-			var coinValue = document.getElementById('NumberOfCoinsStart').value
-			var Days = document.getElementById('AgeOfTransaction').value
-			//*Max Coin days 90*//
-			if (Days > 91) {
-				Days = 91;
-			}
-			//	alert("Number Of Coins Start = " + coinValue);
-			//	alert("Age of transaction = " + Days);
-			var customPOSReward = calculateReward(Days, coinValue);
-			var minPOSReward = calculateReward(31, coinValue);
-			var maxPOSReward = calculateReward(91, coinValue);
-			var customDayTotal = parseFloat(customPOSReward)+parseFloat(coinValue);
-			var maxDayTotal = parseFloat(maxPOSReward)+parseFloat(coinValue);
-			var minDayTotal = parseFloat(minPOSReward)+parseFloat(coinValue);
-			//alert("Proof Of Stake Reward = " + customPOSReward);
-			document.getElementById('customDay').innerHTML = customPOSReward + ' PPC';
-			document.getElementById('30Day').innerHTML = minPOSReward + ' PPC';
-			document.getElementById('90Day').innerHTML = maxPOSReward + ' PPC';
-			document.getElementById('customDayTotal').innerHTML = customDayTotal;
-			document.getElementById('30DayTotal').innerHTML = minDayTotal;
-			document.getElementById('90DayTotal').innerHTML = maxDayTotal;
-			
-			////second compound interest ////
-			var customPOSReward2 = calculateReward(Days, customDayTotal);
-			var minPOSReward2 = calculateReward(31, minDayTotal);
-			var maxPOSReward2 = calculateReward(91, maxDayTotal);
-			var customDayTotal2 = parseFloat(customPOSReward2)+parseFloat(customDayTotal);
-			var minDayTotal2 = parseFloat(minPOSReward2)+parseFloat(minDayTotal);
-			var maxDayTotal2 = parseFloat(maxPOSReward2)+parseFloat(maxDayTotal);
-			//alert("Proof Of Stake Reward = " + customPOSReward2);
-			document.getElementById('customDay2').innerHTML = customPOSReward2 + ' PPC';
-			document.getElementById('30Day2').innerHTML = minPOSReward2 + ' PPC';
-			document.getElementById('90Day2').innerHTML = maxPOSReward2 + ' PPC';
-			document.getElementById('customDayTotal2').innerHTML = customDayTotal2;
-			document.getElementById('30DayTotal2').innerHTML = minDayTotal2;
-			document.getElementById('90DayTotal2').innerHTML = maxDayTotal2;
-		}
-
-		function calculateReward(days, coins) {
-			return (days<31?0:((days*coins)*33/((365*33+8))*0.01));
 		}
 	</script>
 
@@ -82,9 +81,12 @@
 
 	<h1>Peercoin Proof Of Stake (POS) calculator</h1>
 
-	<p>
-		<strong>Warning:</strong> This calculator is still under development, so features are lacking and there may be bugs.
-	</p>
+	<h2>Warnings:</h2>
+
+	<ul>
+		<li>This calculator is still under development and may contain bugs.</li>
+		<li>This calculator can only provide an estimate of the interest produced, as the proof of stake process is inherently random.</li>
+	</ul>
 	
 	<h2>Usage</h2>
 
@@ -94,85 +96,15 @@
 		<li>The second line then shows you the POS reward for having not moved the coins + the POS earned from before (so your compound interest) on you initial holding.</li>
 	</ul>
 
-	Number Of Coins Start <input type ="number" id="NumberOfCoinsStart" value="1000" onBlur="return is_int(this)"><br>
-	Age of transaction (days) <input type="number" id="AgeOfTransaction" value="31"><br>
-	<input type="button" onclick="run()" value="Calculate POS reward">
+	<p>
+		Value of Transaction (PPC): <input type ="number" id="transaction_value" value="1000"><br>
+		Age of Transaction (days): <input type="number" id="transaction_age" value="30"><br>
+		Time to Simulate (months): <input type="number" id="simulation_time" value="12"><br>
+		<input type="button" onclick="run()" value="Calculate Estimated Reward">
+	</p>
 
-	<table>
-		<tr>
-			<th style="width:50px">
-				<label >Compound Iteration</label>
-			</th>
-			<th style="width:200px">
-				<label >POS reward </label>
-			</th>
-			<th style="width:200px">
-				<label >30 day POS reward </label>
-			</th>
-			<th style="width:200px">
-				<label >90 day POS reward </label>
-			</th>
-			<th style="width:200px">
-				<label >custom day PPC total </label>
-			</th>
-			<th style="width:200px">
-				<label >30 day PPC total </label>
-			</th>
-			<th style="width:200px">
-				<label >90 day PPC total </label>
-			</th>
-		</tr>
+	<span id="results"></span>
 
-		<tr>
-			<td>
-				1
-			</td>
-			<td>
-				<label id="customDay"> </label>
-			</td>
-			<td>
-				<label id="30Day"> </label>
-			</td>
-			<td>
-				<label id="90Day"> </label>
-			</td>
-			<td>
-				<label id="customDayTotal"> </label>
-			</td>
-			<td>
-				<label id="30DayTotal"> </label>
-			</td>
-			<td>
-				<label id="90DayTotal"> </label>
-			</td>
-		</tr>
-
-		<tr>
-			<td>
-				2
-			</td>
-			<td>
-				<label id="customDay2"> </label>
-			</td>
-			<td>
-				<label id="30Day2"> </label>
-			</td>
-			<td>
-				<label id="90Day2"> </label>
-			</td>
-			<td>
-				<label id="customDayTotal2"> </label>
-			</td>
-			<td>
-				<label id="30DayTotal2"> </label>
-			</td>
-			<td>
-				<label id="90DayTotal2"> </label>
-			</td>
-		</tr>
-	</table>
-
-	<br>
 	<footer>
 		<a href="http://peer4commit.com/projects/5" target="_blank">Donate to the development of this project</a><br>
 		<a href="http://donate.peercointalk.org" target="_blank">Donate to Peercointalk projects</a><br>
